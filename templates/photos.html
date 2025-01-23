@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Photo Gallery</title>
+</head>
+<body>
+    <h1>Photo Gallery</h1>
+    <ul>
+        {% for photo in photos %}
+        <li><a href="/photos/{{ photo }}">{{ photo }}</a></li>
+        {% endfor %}
+    </ul>
+    <a href="index.html">Back to Home</a>
+</body>
+</html>

@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Camera Web Server</title>
+</head>
+<body>
+    <h1>Raspberry Pi Camera</h1>
+
+    <!-- Live Preview -->
+    <h2>Live Preview</h2>
+    <img src="/live_preview" alt="Live Camera Preview" style="width: 100%; max-width: 640px;">
+
+    <!-- Take Photo Button -->
+    <form action="/take_photo" method="post">
+        <button type="submit">Take Photo</button>
+    </form>
+
+    <!-- Link to Photo Gallery -->
+    <a href="photos.html">View Photos</a>
+</body>
+</html>

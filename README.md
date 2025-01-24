@@ -1,6 +1,6 @@
 # RaspiDigicam
 
-![alt text](https://github.com/JohanJVillanueva/RaspiDigicam/blob/main/mockup.jpg?raw=true)
+![alt text](https://github.com/JohanJVillanueva/RaspiDigicam/blob/main/mockup2.jpg?raw=true)
 
 A Raspberry Pi-based digital camera using the Raspberry Pi Camera Module V2 and the Waveshare 3.5" Touchscreen LCD.
 

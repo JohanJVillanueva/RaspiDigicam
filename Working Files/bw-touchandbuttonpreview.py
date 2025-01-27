@@ -1,23 +1,12 @@
 from gpiozero import Button
 from picamera2 import Picamera2, Preview
 import cv2
-import numpy as np
 from pynput import mouse
 import time
 import tkinter as tk
 from PIL import Image, ImageTk
 import os
-from datetime import datetime
 
-def apply_contrast_bw(image, alpha=2.0, beta=50):
-    """Convert to high-contrast black and white image."""
-    # Convert to grayscale
-    gray_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-
-    # Apply contrast: alpha (contrast) and beta (brightness)
-    contrast_image = cv2.convertScaleAbs(gray_image, alpha=alpha, beta=beta)
-
-    return contrast_image
 
 def capture_screenshot(frame):
     frame_data = picam2.capture_array()
@@ -25,42 +14,25 @@ def capture_screenshot(frame):
     # Convert the frame to BGR color space
     frame_bgr = cv2.cvtColor(frame_data, cv2.COLOR_RGB2BGR)
 
-    # Crop the edges to avoid the window (adjust as needed)
-    height, width = frame_bgr.shape[:2]
-    crop_top = int(height * 0.05)
-    crop_bottom = int(height * 0.95)
-    crop_left = int(width * 0.05)
-    crop_right = int(width * 0.95)
+    # Convert the image to grayscale (black and white)
+    frame_bw = cv2.cvtColor(frame_bgr, cv2.COLOR_BGR2GRAY)
 
-    cropped_frame = frame_bgr[crop_top:crop_bottom, crop_left:crop_right]
+    # Save the image to a unique file
+    save_path = '/home/dsp/Pictures'
+    os.makedirs(save_path, exist_ok=True)  # Ensure the directory exists
 
-    # Apply black and white effect with high contrast
-    contrast_bw_frame = apply_contrast_bw(cropped_frame)
+    # Find the next available filename
+    index = 1
+    while os.path.exists(os.path.join(save_path, f'image_{index:03d}.jpg')):
+        index += 1
 
-    # Get the current date and time
-    current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-
-    # Add the date and time in the bottom-right corner
-    font = cv2.FONT_HERSHEY_SIMPLEX
-    font_scale = .5  # Small font size
-    font_color = (66, 174, 255)  # Yellow-orange color (BGR format)
-    font_thickness = 1
-
-    # Get text size to position it correctly in the bottom-right corner
-    text_size = cv2.getTextSize(current_time, font, font_scale, font_thickness)[0]
-    text_x = 350
-    text_y = 400
-
-    # Put the text on the image
-    cv2.putText(contrast_bw_frame, current_time, (text_x, text_y), font, font_scale, font_color, font_thickness)
-
-    # Save the image with effects to a file
-    filename = f'/home/dsp/Pictures/{frame:03d}.jpg'
-    cv2.imwrite(filename, contrast_bw_frame)
+    filename = os.path.join(save_path, f'image_{index:03d}.jpg')
+    cv2.imwrite(filename, frame_bw)
     print('Image captured: ' + filename)
-    
+
     # Show a tkinter window for 2 seconds to indicate the screenshot was taken
     show_confirmation_window(filename)
+
 
 # Function to show the confirmation window
 def show_confirmation_window(filename):
@@ -81,6 +53,7 @@ def show_confirmation_window(filename):
 
     # Start the tkinter main loop
     window.mainloop()
+
 
 # Function to show the latest image as an overlay
 def show_image_overlay(previous_window, filename):
@@ -119,6 +92,7 @@ def show_image_overlay(previous_window, filename):
     # Start the tkinter main loop for the overlay window
     overlay_window.mainloop()
 
+
 # Mouse listener function to detect mouse click
 def on_click(x, y, button, pressed):
     global frame, mouse_pressed
@@ -132,6 +106,7 @@ def on_click(x, y, button, pressed):
             frame += 1
             mouse_pressed = False  # Reset after capturing
             print("Captured image, waiting for next click.")
+
 
 # Initialize Picamera2 and set up preview
 with Picamera2() as picam2:

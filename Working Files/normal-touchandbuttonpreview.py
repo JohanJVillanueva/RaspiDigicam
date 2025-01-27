@@ -1,8 +1,6 @@
-#!/usr/bin/env python3
 from gpiozero import Button
 from picamera2 import Picamera2, Preview
 import cv2
-import numpy as np
 from pynput import mouse
 import time
 import tkinter as tk
@@ -10,46 +8,45 @@ from PIL import Image, ImageTk
 import os
 from datetime import datetime
 
+
 def capture_screenshot(frame):
     frame_data = picam2.capture_array()
 
     # Convert the frame to BGR color space
     frame_bgr = cv2.cvtColor(frame_data, cv2.COLOR_RGB2BGR)
 
-    # Crop the edges to avoid the window (adjust as needed)
-    height, width = frame_bgr.shape[:2]
-    crop_top = int(height * 0.02)
-    crop_bottom = int(height * 0.98)
-    crop_left = int(width * 0.02)
-    crop_right = int(width * 0.98)
-
-    cropped_frame = frame_bgr[crop_top:crop_bottom, crop_left:crop_right]
-
     # Get the current date and time
     current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
     # Add the date and time in the bottom-right corner
     font = cv2.FONT_HERSHEY_SIMPLEX
-    font_scale = .5  # Small font size
-    font_color = (66, 174, 255)  # Yellow-orange color (BGR format)
+    font_scale = 0.5
+    font_color = (255, 255, 255)  # White text
     font_thickness = 1
 
     # Get text size to position it correctly in the bottom-right corner
     text_size = cv2.getTextSize(current_time, font, font_scale, font_thickness)[0]
-    text_x = 350
-    text_y = 400
+    text_x = frame_bgr.shape[1] - text_size[0] - 10
+    text_y = frame_bgr.shape[0] - 10
 
     # Put the text on the image
-    cv2.putText(cropped_frame, current_time, (text_x, text_y), font, font_scale, font_color, font_thickness)
+    cv2.putText(frame_bgr, current_time, (text_x, text_y), font, font_scale, font_color, font_thickness)
 
-    # Save the image with effects to a file
-    filename = f'/home/dsp/Pictures/{frame:03d}.jpg'
-    cv2.imwrite(filename, cropped_frame)
+    # Save the image to a unique file
+    save_path = '/home/dsp/Pictures'
+    os.makedirs(save_path, exist_ok=True)  # Ensure the directory exists
+
+    # Find the next available filename
+    index = 1
+    while os.path.exists(os.path.join(save_path, f'image_{index:03d}.jpg')):
+        index += 1
+
+    filename = os.path.join(save_path, f'image_{index:03d}.jpg')
+    cv2.imwrite(filename, frame_bgr)
     print('Image captured: ' + filename)
 
     # Show a tkinter window for 2 seconds to indicate the screenshot was taken
     show_confirmation_window(filename)
-
 
 
 # Function to show the confirmation window
@@ -71,6 +68,7 @@ def show_confirmation_window(filename):
 
     # Start the tkinter main loop
     window.mainloop()
+
 
 # Function to show the latest image as an overlay
 def show_image_overlay(previous_window, filename):
@@ -109,6 +107,7 @@ def show_image_overlay(previous_window, filename):
     # Start the tkinter main loop for the overlay window
     overlay_window.mainloop()
 
+
 # Mouse listener function to detect mouse click
 def on_click(x, y, button, pressed):
     global frame, mouse_pressed
@@ -123,6 +122,7 @@ def on_click(x, y, button, pressed):
             mouse_pressed = False  # Reset after capturing
             print("Captured image, waiting for next click.")
 
+
 # Initialize Picamera2 and set up preview
 with Picamera2() as picam2:
     frame = int(time.time())
@@ -134,6 +134,12 @@ with Picamera2() as picam2:
     picam2.configure(preview_config)
     picam2.start()
     print("Preview started")
+
+    # Set up the GPIO button on pin 21
+    button = Button(21)
+
+    # Assign button press to trigger screenshot capture
+    button.when_pressed = lambda: capture_screenshot(frame)
 
     # Start listening for mouse clicks
     with mouse.Listener(on_click=on_click) as listener:

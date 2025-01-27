@@ -40,7 +40,6 @@ def add_vignette(image):
     return vignette_image
 
 
-from datetime import datetime
 
 def capture_screenshot(frame):
     frame_data = picam2.capture_array()
@@ -83,15 +82,21 @@ def capture_screenshot(frame):
     # Put the text on the image
     cv2.putText(vignette_frame, current_time, (text_x, text_y), font, font_scale, font_color, font_thickness)
 
-    # Save the image with effects to a file
-    filename = f'/home/dsp/Pictures/{frame:03d}.jpg'
+    # Save the image with effects to a unique file
+    save_path = '/home/dsp/Pictures'
+    os.makedirs(save_path, exist_ok=True)  # Ensure the directory exists
+
+    # Find the next available filename
+    index = 1
+    while os.path.exists(os.path.join(save_path, f'image_{index:03d}.jpg')):
+        index += 1
+
+    filename = os.path.join(save_path, f'image_{index:03d}.jpg')
     cv2.imwrite(filename, vignette_frame)
     print('Image captured: ' + filename)
 
     # Show a tkinter window for 2 seconds to indicate the screenshot was taken
     show_confirmation_window(filename)
-
-
 
 # Function to show the confirmation window
 def show_confirmation_window(filename):
@@ -162,7 +167,7 @@ def on_click(x, y, button, pressed):
             capture_screenshot(frame)
             frame += 1
             mouse_pressed = False  # Reset after capturing
-            print("Captured image, waiting for next click.")
+            print("Captured image, waiting for next clic    k.")
 
 # Initialize Picamera2 and set up preview
 with Picamera2() as picam2:

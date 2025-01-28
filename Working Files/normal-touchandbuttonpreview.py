@@ -20,7 +20,7 @@ def capture_screenshot(frame):
 
     # Add the date and time in the bottom-right corner
     font = cv2.FONT_HERSHEY_SIMPLEX
-    font_scale = 0.5
+    font_scale = 1
     font_color = (255, 255, 255)  # White text
     font_thickness = 1
 
@@ -79,8 +79,8 @@ def show_image_overlay(previous_window, filename):
     img = Image.open(filename)
 
     # Get the screen width and height for full-screen display
-    screen_width = img.width
-    screen_height = img.height
+    screen_width = 600
+    screen_height = 480
 
     # Resize the image to fit the screen
     img = img.resize((screen_width, screen_height), Image.ANTIALIAS)
@@ -130,7 +130,7 @@ with Picamera2() as picam2:
 
     # Set up QT preview window
     picam2.start_preview(Preview.QT)
-    preview_config = picam2.create_preview_configuration()
+    preview_config = picam2.create_preview_configuration({"size": (1280, 960)})
     picam2.configure(preview_config)
     picam2.start()
     print("Preview started")

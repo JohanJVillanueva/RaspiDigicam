@@ -85,8 +85,8 @@ if __name__ == "__main__":
     with Picamera2() as picam2:
         # Configure the camera
         picam2.start_preview(Preview.QT)
-        preview_config = picam2.create_preview_configuration()
-        capture_config = picam2.create_still_configuration()
+        preview_config = picam2.create_preview_configuration(main={"size": (1920, 1080), "format": "RGB888"})
+        capture_config = picam2.create_still_configuration(main={"size": (4056, 3040), "format": "RGB888"})
         picam2.configure(preview_config)
         picam2.start()
 
